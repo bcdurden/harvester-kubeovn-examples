@@ -56,7 +56,6 @@ metadata:
   namespace: kube-system
 data:
   enable-vpc-nat-gw: 'true'
-  external-gw-nic: eth1
 EOF
 ```
 
