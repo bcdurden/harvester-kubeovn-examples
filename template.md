@@ -22,7 +22,7 @@ Tested `Harvester` Versions:
 `Kubeovn Operator` Versions: 
 * `v1.13.5-rc4`
 
-[Include any other software versions that are part of the implementation. No need to be too granular here, but if bringinging in a new tool, please define it here]
+[Include any other software versions that are part of the implementation. No need to be too granular here, but if bringing in a new tool, please define it here]
 
 ## Issues
 
