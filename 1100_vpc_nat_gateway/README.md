@@ -222,6 +222,8 @@ This essentially makes it impossible to choose kube-ovn's cni as an optional pri
 
 I think this is a bug but I am not certain. I've reached out to find out more. The obvious fix looks to switch mutlus's config to use the confDir instead of a delegate, which it looks like its already primed for anyway.
 
+EDIT: This is not a bug it seems, just an intentional configuration that is overriding default RKE2 behavious. I'm going to investigate further but early tweaks to allow for kubeovn to be an optional primary were not successful
+
 ## Deep Dive
 
 Deeper explanation following success
