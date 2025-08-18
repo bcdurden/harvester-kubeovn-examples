@@ -93,7 +93,7 @@ EOF
 
 2) Create a new subnet named 'my-external-subnet' and reference this NAD as the provider. The specs for this subnet should match your host network that `Harvester` runs upon. 
 
-    * For me that is `10.10.0.0/24`. Note that I am excluding all network addresses in my upstream that are managed by my upstream gateway's DHCP. Everything below `10.10.0.50` is a private address. 
+    * For me that is `10.10.0.0/24`. Note that I am excluding all network addresses in my upstream that are managed by my upstream gateway's DHCP. Everything below `10.10.0.50` is a private address. I use the static addresses for other things but leave everything below .10 alone. 
     * Note that I am patching out the webhook. Given this is a very early implementation of Kubeovn, some of the more prescriptive requirements enforced in the webhook have to be disabled manually. They will return upon reboot.
 ```bash
 RULE_INDEX=$(kubectl get validatingwebhookconfiguration harvester-network-webhook -o yaml \
@@ -137,7 +137,13 @@ metadata:
     network.harvesterhci.io/type: OverlayNetwork
 spec:
   config: >-
-    {"cniVersion":"0.3.1","name":"${PROVIDER_NAME}","type":"kube-ovn","provider":"${PROVIDER_NAME}.default.ovn","server_socket":"/run/openvswitch/kube-ovn-daemon.sock"}
+    {
+      "cniVersion": "0.3.1",
+      "name": "${PROVIDER_NAME}",
+      "type": "kube-ovn",
+      "provider": "${PROVIDER_NAME}.default.ovn",
+      "server_socket": "/run/openvswitch/kube-ovn-daemon.sock"
+    }
 ---
 apiVersion: kubeovn.io/v1
 kind: Subnet

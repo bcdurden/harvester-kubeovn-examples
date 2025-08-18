@@ -1,0 +1,95 @@
+#! VARS:
+#! VM_IMAGE_NAME
+#! VM_NAME
+#! PROVIDER_NAME
+#! DNS_SERVER
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  annotations:
+    harvesterhci.io/vmRunStrategy: RerunOnFailure
+    harvesterhci.io/volumeClaimTemplates: >-
+      [{"metadata":{"name":"$VM_NAME-disk","annotations":{"harvesterhci.io/imageId":"default/$VM_IMAGE_NAME"}},"spec":{"accessModes":["ReadWriteMany"],"resources":{"requests":{"storage":"50Gi"}},"volumeMode":"Block","storageClassName":"longhorn-$VM_IMAGE_NAME"}}]
+  name: $VM_NAME
+  namespace: default
+spec:
+  runStrategy: RerunOnFailure
+  template:
+    metadata:
+      annotations:
+        harvesterhci.io/sshNames: '[]'
+        ${PROVIDER_NAME}.default.ovn.kubernetes.io/default_route: "true"
+      labels:
+        harvesterhci.io/vmName: $VM_NAME
+    spec:
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+          - ${DNS_SERVER}
+        options:
+          - name: ndots
+            value: "5"
+      architecture: amd64
+      domain:
+        cpu:
+          cores: 4
+          sockets: 1
+          threads: 1
+        devices:
+          disks:
+            - bootOrder: 1
+              disk:
+                bus: virtio
+              name: disk-0
+            - disk:
+                bus: virtio
+              name: cloudinitdisk
+          interfaces:
+            - bridge: {}
+              model: virtio
+              name: default
+        features:
+          acpi:
+            enabled: true
+        firmware:
+          bootloader:
+            efi:
+              secureBoot: false
+        machine:
+          type: q35
+        memory:
+          guest: 8Gi
+        resources:
+          limits:
+            cpu: '4'
+            memory: 8Gi
+          requests:
+            cpu: 250m
+            memory: 5461Mi
+      evictionStrategy: LiveMigrateIfPossible
+      hostname: $VM_NAME
+      networks:
+        - multus:
+            networkName: default/$PROVIDER_NAME
+          name: default
+      terminationGracePeriodSeconds: 120
+      volumes:
+        - name: disk-0
+          persistentVolumeClaim:
+            claimName: $VM_NAME-disk
+        - cloudInitNoCloud:
+            userData: |
+              #cloud-config
+              package_update: true
+              packages:
+                - qemu-guest-agent
+              runcmd:
+                - - systemctl
+                  - enable
+                  - --now
+                  - qemu-guest-agent.service
+              password: password
+              chpasswd: { expire: False }
+              ssh_pwauth: True
+            networkData: ""
+          name: cloudinitdisk
