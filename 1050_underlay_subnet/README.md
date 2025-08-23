@@ -57,7 +57,7 @@ kind: ProviderNetwork
 metadata:
   name: pn-mgmt
 spec:
-  defaultInterface: mgmt-bo
+  defaultInterface: enp2s0
 EOF
 ```
 
@@ -75,6 +75,8 @@ spec:
 EOF
 ```
 
+
+**NOTE: This is where I go wrong. Provider Network is defining an underlay. NAD is different**
 We also need a NAD that will function as our provider, this is easy.
 
 ```bash
@@ -115,7 +117,6 @@ spec:
   excludeIps:
   - 10.10.16.50..10.10.16.254
   vlan: vlan6
-  provider: pn-mgmt.default.ovn
 EOF
 ```
 

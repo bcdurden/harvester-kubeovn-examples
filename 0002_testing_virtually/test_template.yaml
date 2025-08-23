@@ -1,0 +1,97 @@
+---
+apiVersion: harvesterhci.io/v1beta1
+kind: VirtualMachineTemplate
+metadata:
+  name: kubeovn-rig
+  namespace: default
+spec:
+  defaultVersionId: default/kubeovn-rig-rc6-current
+---
+apiVersion: harvesterhci.io/v1beta1
+kind: VirtualMachineTemplateVersion
+metadata:
+  annotations:
+    template-version.harvesterhci.io/customName: vDjjGXG6Z1
+  generateName: kubeovn-rig-
+  labels:
+    template.harvesterhci.io/templateID: kubeovn-rig-rc6
+  name: kubeovn-rig-current
+  namespace: default
+spec:
+  templateId: default/kubeovn-rig-rc6
+  vm:
+    metadata:
+      annotations:
+        harvesterhci.io/volumeClaimTemplates: '[{"metadata":{"name":"-disk-0"},"spec":{"accessModes":["ReadWriteMany"],"resources":{"requests":{"storage":"500Gi"}},"volumeMode":"Block","storageClassName":"harvester-longhorn"}},{"metadata":{"name":"-disk-1","annotations":{"harvesterhci.io/imageId":"default/${VM_IMAGE_NAME}"}},"spec":{"accessModes":["ReadWriteMany"],"resources":{"requests":{"storage":"7Gi"}},"volumeMode":"Block","storageClassName":"longhorn-${VM_IMAGE_NAME}"}}]'
+      labels:
+        harvesterhci.io/os: ""
+    spec:
+      runStrategy: RerunOnFailure
+      template:
+        metadata:
+          annotations:
+            harvesterhci.io/sshNames: '[]' 
+        spec:
+          affinity: {}
+          domain:
+            cpu:
+              model: host-passthrough
+              cores: 8
+              sockets: 1
+              threads: 1
+            devices:
+              disks:
+              - bootOrder: 1
+                disk:
+                  bus: virtio
+                name: disk-0
+              - bootOrder: 2
+                cdrom:
+                  bus: sata
+                name: disk-1
+              - disk:
+                  bus: virtio
+                name: cloudinitdisk
+              interfaces:
+              - bridge: {}
+                model: virtio
+                name: default
+              - bridge: {}
+                model: virtio
+                name: nic-1
+              tpm: {}
+            features:
+              acpi:
+                enabled: true
+            firmware:
+              bootloader:
+                efi:
+                  secureBoot: false
+            machine:
+              type: ""
+            resources:
+              limits:
+                cpu: "8"
+                memory: 32Gi
+          evictionStrategy: LiveMigrateIfPossible
+          networks:
+          - multus:
+              networkName: default/host
+            name: default
+          - multus:
+              networkName: default/host
+            name: nic-1
+          terminationGracePeriodSeconds: 120
+          volumes:
+          - name: disk-0
+            persistentVolumeClaim:
+              claimName: -disk-0
+          - name: disk-1
+            persistentVolumeClaim:
+              claimName: -disk-1
+          - cloudInitNoCloud:
+              networkDataSecretRef:
+                name: kubeovn-rig
+              secretRef:
+                name: kubeovn-rig
+            name: cloudinitdisk
